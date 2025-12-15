@@ -1,0 +1,65 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@theme {
+  --color-primary: #10b981;
+  --color-secondary: #3b82f6;
+  --color-accent: #f59e0b;
+
+  /* Semantic Colors mapped to variables */
+  --color-app-bg: var(--bg-app);
+  --color-card-bg: var(--bg-card);
+  --color-sidebar-bg: var(--bg-sidebar);
+  --color-text-main: var(--text-main);
+  --color-text-muted: var(--text-muted);
+  --color-border-base: var(--border-base);
+
+  --color-chat-user: var(--bg-chat-user);
+  --color-chat-bot: var(--bg-chat-bot);
+}
+
+:root {
+  /* Light Mode */
+  --bg-app: #f9fafb;
+  /* gray-50 */
+  --bg-card: #ffffff;
+  /* white */
+  --bg-sidebar: #ffffff;
+  /* white */
+  --text-main: #111827;
+  /* gray-900 */
+  --text-muted: #6b7280;
+  /* gray-500 */
+  --border-base: #e5e7eb;
+  /* gray-200 */
+
+  --bg-chat-user: #10b981;
+  /* emerald-500 */
+  --bg-chat-bot: #f3f4f6;
+  /* gray-100 */
+}
+
+.dark {
+  /* Dark Mode */
+  --bg-app: #0f172a;
+  /* slate-900 */
+  --bg-card: #1e293b;
+  /* slate-800 */
+  --bg-sidebar: #0f172a;
+  /* slate-900 (blend with bg for cleaner look) */
+  --text-main: #f9fafb;
+  /* gray-50 */
+  --text-muted: #9ca3af;
+  /* gray-400 */
+  --border-base: #334155;
+  /* slate-700 */
+
+  --bg-chat-user: #059669;
+  /* emerald-600 */
+  --bg-chat-bot: #334155;
+  /* slate-700 */
+}
+
+body {
+  @apply bg-app-bg text-text-main transition-colors duration-200;
+}

@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.env
+
+# Javascript
+node_modules/
+dist/
+.DS_Store
+
+# Uploads & Media
+uploads/
+backend/uploads/
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.webp
+
+backend/data/

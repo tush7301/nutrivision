@@ -1,15 +1,15 @@
-from fastapi import APIRouter, HTTPException, Depends
+from typing import List, Dict, Any
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from datetime import datetime, date
 from pydantic import BaseModel
-from typing import List, Dict
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
-from app.services.llm_service import llm_service
 from app.db.base import get_db
-from app.models.meal import Meal
-
 from app.api.deps import get_current_user
 from app.models.user import User
+from app.services.llm_service import llm_service
+from app.models.meal import Meal
 
 router = APIRouter()
 
@@ -28,13 +28,24 @@ async def chat_message(
 ):
     try:
         # Fetch today's meals for context
-        today = date.today()
-        # Filter where created_at date equals today
-        # Note: created_at is datetime, so we need to filter carefully or fetch recent and filter in python
-        # Simple approach: fetch last 50 and filter in python
+        # Fetch today's meals for context
+        # Use Eastern Time (ET) for "today"
+        utc = ZoneInfo("UTC")
+        et = ZoneInfo("America/New_York")
+        now_et = datetime.now(et)
+        today = now_et.date()
+        
         recent_meals = db.query(Meal).filter(Meal.user_id == current_user.id).order_by(Meal.created_at.desc()).limit(50).all()
         
-        todays_meals = [m for m in recent_meals if m.created_at.date() == today]
+        todays_meals = []
+        for m in recent_meals:
+            # Convert stored UTC time to ET
+            # Assuming m.created_at is naive UTC as per default SQLAlchemy behavior
+            if m.created_at:
+                created_at_utc = m.created_at.replace(tzinfo=utc)
+                created_at_et = created_at_utc.astimezone(et)
+                if created_at_et.date() == today:
+                    todays_meals.append(m)
         total_calories = sum(m.calories for m in todays_meals)
         
         meal_summary = ", ".join([f"{m.food_name} ({m.calories} kcal)" for m in todays_meals])

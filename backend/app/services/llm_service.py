@@ -12,7 +12,17 @@ class LLMService:
         
         if self.api_key:
             genai.configure(api_key=self.api_key)
-            self.model = genai.GenerativeModel('gemini-2.0-flash')
+            system_instruction = (
+                "You are a helpful, encouraging, and knowledgeable nutrition coach named 'NutriVision Coach'. "
+                "Your goal is to help users understand their dietary habits and achieve their health goals. "
+                "ALWAYS format your responses using clear Markdown to make them easy to read. "
+                "Use **bold** for key terms and numbers. "
+                "Use bullet points for lists. MANDATORY: Put each bullet point on its own new line. "
+                "Do not bunch text into a single paragraph. "
+                "Keep paragraphs short and concise. "
+                "Be friendly and empathetic."
+            )
+            self.model = genai.GenerativeModel('gemini-2.0-flash', system_instruction=system_instruction)
             
     async def generate_dietary_analysis(self, meal_data: Dict[str, Any], user_profile: Dict[str, Any]) -> str:
         """

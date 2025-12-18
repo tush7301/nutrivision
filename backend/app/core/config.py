@@ -5,6 +5,7 @@ import os
 class Settings(BaseSettings):
     PROJECT_NAME: str = "NutriVision"
     API_V1_STR: str = "/api/v1"
+    BACKEND_CORS_ORIGINS: list[str] = ["http://localhost:5173", "http://localhost:80"]
     
     # Database
     DATABASE_URL: str = "sqlite:///./nutrivision.db"

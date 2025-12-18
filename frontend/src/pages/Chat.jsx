@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Send, User, Bot, Sparkles, Loader } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
 import clsx from 'clsx';
 import api from '../api/axios';
 
@@ -66,12 +67,20 @@ export default function Chat() {
                             {msg.role === 'user' ? <User size={16} /> : <Bot size={16} />}
                         </div>
                         <div className={clsx(
-                            "p-3 rounded-2xl text-sm leading-relaxed",
+                            "p-3 rounded-2xl text-sm leading-relaxed max-w-full overflow-hidden",
                             msg.role === 'user'
                                 ? "bg-chat-user text-gray-900 dark:text-white rounded-tr-none"
-                                : "bg-chat-bot text-text-main rounded-tl-none"
+                                : "bg-chat-bot text-text-main rounded-tl-none w-full"
                         )}>
-                            {msg.text}
+                            {msg.role === 'user' ? (
+                                msg.text
+                            ) : (
+                                <ReactMarkdown
+                                    className="prose prose-sm prose-emerald dark:prose-invert max-w-none prose-p:my-1 prose-headings:my-2 prose-ul:my-1 prose-li:my-0"
+                                >
+                                    {msg.text}
+                                </ReactMarkdown>
+                            )}
                         </div>
                     </div>
                 ))}

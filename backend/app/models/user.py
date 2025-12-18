@@ -11,6 +11,7 @@ class User(Base):
     email = Column(String, unique=True, index=True, nullable=False)
     full_name = Column(String, nullable=True)
     picture = Column(String, nullable=True)
+    language = Column(String, default="en") # en, es, hi, fr, etc.
     
     created_at = Column(DateTime, default=datetime.utcnow)
     

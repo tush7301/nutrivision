@@ -63,6 +63,10 @@ class LLMService:
                 "However, focus your advice on the primary prediction unless you are unsure."
             )
 
+        # Multilingual Support
+        language = user_profile.get('language', 'en')
+        base_prompt += f"\n\nIMPORTANT: Respond in the user's preferred language: {language}. localize the response appropriately."
+        
         base_prompt += "\nProvide brief, actionable advice."
         return base_prompt
 

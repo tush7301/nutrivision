@@ -60,8 +60,12 @@ async def upload_meal(
     }
     
     # 3. LLM Coaching
-    # Mock user profile
-    user_profile = {"goal": "lose weight", "preferences": "low carb"}
+    # Mock user profile (augmented with real User data)
+    user_profile = {
+        "goal": "lose weight", 
+        "preferences": "low carb",
+        "language": current_user.language or "en"
+    }
     advice = await llm_service.generate_dietary_analysis(meal_data, user_profile)
     
     # 4. Save to DB
@@ -81,7 +85,7 @@ async def upload_meal(
     db.commit()
     db.refresh(db_meal)
     
-    return {"meal": db_meal, "advice": advice}
+    return {"meal": db_meal, "advice": advice, "is_food": True}
 
 @router.get("/", response_model=List[MealSchema])
 def get_meals(

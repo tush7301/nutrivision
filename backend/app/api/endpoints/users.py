@@ -9,6 +9,23 @@ from app.models.user import User
 
 router = APIRouter()
 
+from pydantic import BaseModel
+
+class UserUpdate(BaseModel):
+    language: str
+
+@router.put("/me")
+def update_user_me(
+    user_in: UserUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    current_user.language = user_in.language
+    db.add(current_user)
+    db.commit()
+    db.refresh(current_user)
+    return current_user
+
 @router.get("/stats")
 def get_user_stats(
     db: Session = Depends(get_db),

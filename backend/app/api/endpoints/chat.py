@@ -60,7 +60,8 @@ async def chat_message(
             f"The user has consumed {total_calories} kcal today. "
             f"Daily goal is 2000 kcal. "
             f"Meals eaten today: {meal_summary if meal_summary else 'None yet'}. "
-            f"Last recorded meal: {last_meal_info}."
+            f"Last recorded meal: {last_meal_info}. "
+            f"IMPORTANT: The user speaks '{current_user.language or 'en'}'. Respond in that language."
         )
 
         response = await llm_service.generate_chat_response(request.history, request.message, context)

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import clsx from 'clsx';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
+import LanguageSelector from './LanguageSelector';
 
 export default function Layout() {
     const [isMobileOpen, setIsMobileOpen] = useState(false);
@@ -75,18 +76,18 @@ export default function Layout() {
 
             {/* Sidebar */}
             <aside className={clsx(
-                "fixed inset-y-0 left-0 z-30 w-64 bg-sidebar-bg border-r border-border-base transform transition-transform duration-200 ease-in-out md:translate-x-0",
+                "fixed inset-y-0 left-0 z-30 w-64 bg-sidebar-bg border-r border-border-base transform transition-transform duration-200 ease-in-out md:translate-x-0 flex flex-col",
                 isMobileOpen ? "translate-x-0" : "-translate-x-full"
             )}>
                 {/* Logo */}
-                <div className="h-16 flex items-center px-6 border-b border-border-base">
+                <div className="h-16 flex items-center px-6 border-b border-border-base flex-shrink-0">
                     <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-emerald-500 to-teal-400">
                         NutriVision
                     </span>
                 </div>
 
                 {/* Navigation */}
-                <nav className="p-4 space-y-2">
+                <nav className="p-4 space-y-2 flex-1 overflow-y-auto">
                     {navItems.map((item) => {
                         const Icon = item.icon;
                         const isActive = location.pathname === item.path;
@@ -109,7 +110,7 @@ export default function Layout() {
                     })}
                 </nav>
 
-                <div className="absolute bottom-0 left-0 right-0 p-4 space-y-4 bg-sidebar-bg border-t border-border-base">
+                <div className="p-4 space-y-4 bg-sidebar-bg border-t border-border-base flex-shrink-0">
                     {/* User Profile */}
                     {user && (
                         <div className="flex items-center gap-3 px-2 mb-2">
@@ -133,6 +134,11 @@ export default function Layout() {
                             </button>
                         </div>
                     )}
+
+                    {/* Language Selector */}
+                    <div className="px-3 py-2 mb-2 rounded-xl bg-gray-50 dark:bg-slate-700/50 border border-border-base">
+                        <LanguageSelector />
+                    </div>
 
                     {/* Theme Toggle - Compressed for space */}
                     <div

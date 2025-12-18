@@ -112,10 +112,20 @@ class VisionService:
             "candidates": candidates
         }
     
-    async def estimate_portion(self, image_bytes: bytes):
+    async def estimate_portion(self, image_bytes: bytes, food_name: str = "unknown"):
+        from app.core.portion_data import PORTION_HEURISTICS, DEFAULT_WEIGHT
+        
+        weight = DEFAULT_WEIGHT
+        # Simple fuzzy matching
+        lower_name = food_name.lower()
+        for key, val in PORTION_HEURISTICS.items():
+            if key in lower_name:
+                weight = val
+                break
+                
         return {
-            "portion_size": "medium",
-            "estimated_weight_g": 350,
+            "portion_size": f"standard ({weight}g)",
+            "estimated_weight_g": weight,
             "confidence": 0.8
         }
 

@@ -46,7 +46,7 @@ async def upload_meal(
                  "is_food": False
              }
              
-        portion = await vision_service.estimate_portion(contents)
+        portion = await vision_service.estimate_portion(contents, prediction["food_name"])
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Vision analysis failed: {str(e)}")
     

@@ -26,5 +26,6 @@ class Meal(MealBase):
         orm_mode = True
 
 class AnalysisResponse(BaseModel):
-    meal: Meal
+    meal: Optional[Meal] = None
     advice: str
+    is_food: bool = True

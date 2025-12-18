@@ -13,6 +13,7 @@ from app.schemas.meal import AnalysisResponse, Meal as MealSchema
 
 from app.api.deps import get_current_user
 from app.models.user import User
+from app.services.nutrition_service import nutrition_service
 
 router = APIRouter()
 
@@ -36,19 +37,21 @@ async def upload_meal(
     # 1. Vision Analysis
     try:
         prediction = await vision_service.predict_food(contents)
+        
+        # Gatekeeper Check
+        if not prediction.get("is_food", True):
+             return {
+                 "meal": None, 
+                 "advice": "This image does not appear to be food. Please upload a photo of a meal.",
+                 "is_food": False
+             }
+             
         portion = await vision_service.estimate_portion(contents)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Vision analysis failed: {str(e)}")
     
     # 2. Nutrition Lookup
-    # Real implementation would query USDA API here based on prediction['food_name']
-    # We'll use mock data for robustness in this demo
-    nutrition_info = {
-        "calories": 450.0 if portion['portion_size'] == "medium" else 250.0,
-        "protein": 15.0,
-        "carbs": 50.0,
-        "fats": 20.0
-    }
+    nutrition_info = await nutrition_service.get_nutrition_info(prediction["food_name"])
     
     meal_data = {
         **prediction,

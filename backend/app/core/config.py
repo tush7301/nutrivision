@@ -25,8 +25,10 @@ class Settings(BaseSettings):
 
     GOOGLE_CLIENT_ID: str | None = Field(default=None, alias="vite_google_client_id")
 
-    GCP_PROJECT_ID: str | None = Field(default=None, alias="vite_gcp_project_id")
-    GCP_LOCATION: str | None = Field(default=None, alias="vite_gcp_location")
+    GCP_PROJECT_ID: str | None = Field(default="plated-complex-480003-d6", alias="GCP_PROJECT_ID")
+    GCP_LOCATION: str | None = Field(default="us-central1", alias="GCP_LOCATION")
+    
+    USDA_API_KEY: str | None = Field(default=None, alias="USDA_API_KEY")
 
     class Config:
         env_file = ".env"

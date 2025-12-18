@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../api/axios';
+import { useAuth } from '../context/AuthContext';
 import { Activity, Clock, ChevronDown, ChevronUp, TrendingUp } from 'lucide-react';
 import clsx from 'clsx';
 import ReactMarkdown from 'react-markdown';
@@ -9,8 +10,9 @@ import CalorieTrendChart from '../components/CalorieTrendChart';
 import StatusBadge from '../components/StatusBadge';
 
 export default function Home() {
+    const { user } = useAuth();
     const [todayMeals, setTodayMeals] = useState([]);
-    const [todayCalories, setTodayCalories] = useState(0);
+    const [todayStats, setTodayStats] = useState({ calories: 0, protein: 0, fat: 0, carbs: 0 });
     const [recentMeals, setRecentMeals] = useState([]);
     const [chartData, setChartData] = useState([]);
     const [stats, setStats] = useState({ totalCalories: 0, avgCalories: 0, count: 0 });
@@ -34,8 +36,19 @@ export default function Home() {
 
             setTodayMeals(todays);
 
-            const total = todays.reduce((acc, curr) => acc + curr.calories, 0);
-            setTodayCalories(Math.round(total));
+            setTodayMeals(todays);
+
+            const totalCals = todays.reduce((acc, curr) => acc + curr.calories, 0);
+            const totalProt = todays.reduce((acc, curr) => acc + (curr.protein || 0), 0);
+            const totalFat = todays.reduce((acc, curr) => acc + (curr.fats || 0), 0);
+            const totalCarb = todays.reduce((acc, curr) => acc + (curr.carbs || 0), 0);
+
+            setTodayStats({
+                calories: Math.round(totalCals),
+                protein: Math.round(totalProt),
+                fat: Math.round(totalFat),
+                carbs: Math.round(totalCarb)
+            });
 
             // Process data for charts
             processData(data);
@@ -109,25 +122,40 @@ export default function Home() {
 
                 {/* Today's Progress Card */}
                 <div className="bg-card-bg p-6 rounded-2xl shadow-sm border border-border-base">
-                    <h2 className="text-lg font-semibold mb-4 flex items-center gap-2 text-text-main">
+                    <h2 className="text-lg font-semibold mb-6 flex items-center gap-2 text-text-main">
                         <Activity size={20} className="text-emerald-500" />
                         Today's Progress
                     </h2>
 
-                    <div className="flex flex-col items-center justify-center h-48">
-                        <div className={`text-5xl font-bold mb-2 ${todayCalories >= 2000 ? 'text-red-500' : 'text-emerald-500'}`}>
-                            {todayCalories}
-                        </div>
-                        <div className="text-text-muted font-medium">Calories Consumed</div>
-                        <div className="mt-4 w-full bg-gray-100 dark:bg-slate-700/50 rounded-full h-2.5 overflow-hidden">
-                            <div
-                                className={`h-2.5 rounded-full ${todayCalories >= 2000 ? 'bg-red-500' : 'bg-emerald-500'}`}
-                                style={{ width: `${Math.min((todayCalories / 2000) * 100, 100)}%` }}
-                            ></div>
-                        </div>
-                        <div className={clsx("text-xs mt-2 font-medium", todayCalories >= 2000 ? "text-red-500" : "text-text-muted")}>
-                            {todayCalories >= 2000 ? "Over Limit!" : "Goal: 2000 kcal"}
-                        </div>
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                        {/* Calories */}
+                        <MacroCard
+                            title="Calories"
+                            current={todayStats.calories}
+                            target={user?.target_calories || 2000}
+                            unit=""
+                        />
+                        {/* Protein */}
+                        <MacroCard
+                            title="Protein"
+                            current={todayStats.protein}
+                            target={user?.target_protein || 150}
+                            unit="g"
+                        />
+                        {/* Carbs */}
+                        <MacroCard
+                            title="Carbs"
+                            current={todayStats.carbs}
+                            target={user?.target_carbs || 200}
+                            unit="g"
+                        />
+                        {/* Fat */}
+                        <MacroCard
+                            title="Fat"
+                            current={todayStats.fat}
+                            target={user?.target_fat || 70}
+                            unit="g"
+                        />
                     </div>
                 </div>
             </div>
@@ -144,6 +172,36 @@ export default function Home() {
 
                 {/* Chart */}
                 <CalorieTrendChart data={chartData} />
+            </div>
+        </div>
+    );
+}
+
+function MacroCard({ title, current, target, unit }) {
+    const percentage = Math.min((current / target) * 100, 100);
+    const isExceeded = current > target;
+    const remaining = Math.max(0, target - current);
+
+    return (
+        <div className="bg-gray-50 dark:bg-slate-700/30 p-4 rounded-xl border border-gray-100 dark:border-slate-700">
+            <div className="text-sm font-medium text-text-muted mb-1">{title}</div>
+            <div className="text-2xl font-bold text-text-main mb-3">
+                {current}
+                <span className="text-xs text-text-muted font-normal ml-1">/ {target} {unit}</span>
+            </div>
+
+            <div className="w-full bg-gray-200 dark:bg-slate-600 rounded-full h-2 mb-2 overflow-hidden">
+                <div
+                    className={clsx("h-2 rounded-full transition-all duration-500", isExceeded ? "bg-red-500" : "bg-emerald-500")}
+                    style={{ width: `${percentage}%` }}
+                />
+            </div>
+
+            <div className={clsx("text-xs font-medium", isExceeded ? "text-red-500" : "text-emerald-500")}>
+                {isExceeded
+                    ? `Over by ${current - target} ${unit}`
+                    : `${remaining} ${unit} left`
+                }
             </div>
         </div>
     );

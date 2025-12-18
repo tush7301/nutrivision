@@ -8,7 +8,7 @@ import LanguageSelector from './LanguageSelector';
 
 export default function Layout() {
     const [isMobileOpen, setIsMobileOpen] = useState(false);
-    const [dailyCalories, setDailyCalories] = useState(0);
+    const [dailyStats, setDailyStats] = useState({ calories: 0, protein: 0, fat: 0, carbs: 0 });
     const location = useLocation();
     const { user, logout } = useAuth();
 
@@ -46,7 +46,16 @@ export default function Layout() {
                         mDate.getFullYear() === now.getFullYear();
                 });
                 const total = todays.reduce((acc, curr) => acc + curr.calories, 0);
-                setDailyCalories(Math.round(total));
+                const totalProtein = todays.reduce((acc, curr) => acc + (curr.protein || 0), 0);
+                const totalFat = todays.reduce((acc, curr) => acc + (curr.fats || 0), 0);
+                const totalCarbs = todays.reduce((acc, curr) => acc + (curr.carbs || 0), 0);
+
+                setDailyStats({
+                    calories: Math.round(total),
+                    protein: Math.round(totalProtein),
+                    fat: Math.round(totalFat),
+                    carbs: Math.round(totalCarbs)
+                });
             }).catch(err => console.error(err));
         };
 
@@ -162,17 +171,55 @@ export default function Layout() {
 
                     <div className={clsx(
                         "p-3 rounded-2xl text-gray-900 dark:text-white shadow-lg transition-colors duration-300",
-                        dailyCalories >= 2000
+                        dailyStats.calories >= (user?.target_calories || 2000)
                             ? "bg-gradient-to-br from-red-500 to-rose-600"
                             : "bg-gradient-to-br from-emerald-500 to-teal-600"
                     )}>
-                        <h3 className="font-semibold text-xs mb-0.5">Daily Goal</h3>
-                        <div className="flex justify-between items-end mb-1.5">
-                            <span className="text-xl font-bold">{dailyCalories.toLocaleString()}</span>
-                            <span className="text-xs opacity-80 mb-0.5">/ {(user?.target_calories || 2000).toLocaleString()}</span>
+                        <h3 className="font-semibold text-xs mb-2">Daily Goals</h3>
+
+                        {/* Calories */}
+                        <div className="mb-3">
+                            <div className="flex justify-between items-end mb-1">
+                                <span className="text-sm font-bold">{dailyStats.calories.toLocaleString()}</span>
+                                <span className="text-[10px] opacity-80 mb-0.5">/ {(user?.target_calories || 2000).toLocaleString()} kcal</span>
+                            </div>
+                            <div className="w-full bg-black/20 rounded-full h-1.5">
+                                <div className="bg-white rounded-full h-1.5" style={{ width: `${Math.min((dailyStats.calories / (user?.target_calories || 2000)) * 100, 100)}%` }}></div>
+                            </div>
                         </div>
-                        <div className="w-full bg-black/20 rounded-full h-1">
-                            <div className="bg-white rounded-full h-1" style={{ width: `${Math.min((dailyCalories / (user?.target_calories || 2000)) * 100, 100)}%` }}></div>
+
+                        {/* Macros Grid */}
+                        <div className="grid grid-cols-3 gap-2">
+                            {/* Protein */}
+                            <div>
+                                <div className="flex justify-between text-[10px] opacity-90 mb-0.5">
+                                    <span>Prot</span>
+                                    <span>{dailyStats.protein}/{user?.target_protein || 150}</span>
+                                </div>
+                                <div className="w-full bg-black/20 rounded-full h-1">
+                                    <div className="bg-white/90 rounded-full h-1" style={{ width: `${Math.min((dailyStats.protein / (user?.target_protein || 150)) * 100, 100)}%` }}></div>
+                                </div>
+                            </div>
+                            {/* Carbs */}
+                            <div>
+                                <div className="flex justify-between text-[10px] opacity-90 mb-0.5">
+                                    <span>Carb</span>
+                                    <span>{dailyStats.carbs}/{user?.target_carbs || 200}</span>
+                                </div>
+                                <div className="w-full bg-black/20 rounded-full h-1">
+                                    <div className="bg-white/90 rounded-full h-1" style={{ width: `${Math.min((dailyStats.carbs / (user?.target_carbs || 200)) * 100, 100)}%` }}></div>
+                                </div>
+                            </div>
+                            {/* Fat */}
+                            <div>
+                                <div className="flex justify-between text-[10px] opacity-90 mb-0.5">
+                                    <span>Fat</span>
+                                    <span>{dailyStats.fat}/{user?.target_fat || 70}</span>
+                                </div>
+                                <div className="w-full bg-black/20 rounded-full h-1">
+                                    <div className="bg-white/90 rounded-full h-1" style={{ width: `${Math.min((dailyStats.fat / (user?.target_fat || 70)) * 100, 100)}%` }}></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

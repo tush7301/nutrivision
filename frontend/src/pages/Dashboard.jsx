@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import api from '../api/axios';
-import { TrendingUp } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 import StatsCards from '../components/StatsCards';
-import CalorieTrendChart from '../components/CalorieTrendChart';
+import TrendChart from '../components/TrendChart'; // Updated import
 import StatusBadge from '../components/StatusBadge';
 
 export default function Dashboard() {
-    const [meals, setMeals] = useState([]);
+    const { user } = useAuth();
     const [chartData, setChartData] = useState([]);
     const [stats, setStats] = useState({ totalCalories: 0, avgCalories: 0, count: 0 });
 
@@ -14,7 +14,6 @@ export default function Dashboard() {
         // Fetch meals for stats
         api.get('/meals/?limit=100').then(res => {
             const data = res.data;
-            setMeals(data);
             processData(data);
         }).catch(err => console.error(err));
     }, []);
@@ -30,10 +29,16 @@ export default function Dashboard() {
             if (!agg[dateKey]) {
                 agg[dateKey] = {
                     calories: 0,
+                    protein: 0,
+                    fat: 0,
+                    carbs: 0,
                     dateObj: dateObj
                 };
             }
             agg[dateKey].calories += meal.calories;
+            agg[dateKey].protein += (meal.protein || 0);
+            agg[dateKey].fat += (meal.fats || 0);
+            agg[dateKey].carbs += (meal.carbs || 0);
         });
 
         // Convert to array and sort chronologically
@@ -45,11 +50,12 @@ export default function Dashboard() {
         // Format for chart
         const chart = last7Days.map(key => ({
             name: agg[key].dateObj.toLocaleDateString('en-US', { weekday: 'short' }),
-            calories: agg[key].calories
+            calories: Math.round(agg[key].calories),
+            protein: Math.round(agg[key].protein),
+            fat: Math.round(agg[key].fat),
+            carbs: Math.round(agg[key].carbs)
         }));
 
-        // Calculate stats for the viewed period (or total available?)
-        // Let's keep total based on fetched data for now, but maybe "Calories this week" means chart sum
         const weeklyTotal = last7Days.reduce((sum, key) => sum + agg[key].calories, 0);
 
         setChartData(chart);
@@ -61,7 +67,7 @@ export default function Dashboard() {
     };
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 pb-8">
             <div className="flex items-center justify-between">
                 <h1 className="text-3xl font-bold text-text-main">Weekly Insights</h1>
                 <StatusBadge avgCalories={stats.avgCalories} />
@@ -70,8 +76,38 @@ export default function Dashboard() {
             {/* Stats Cards */}
             <StatsCards stats={stats} />
 
-            {/* Chart */}
-            <CalorieTrendChart data={chartData} />
+            {/* Charts Grid */}
+            <h2 className="text-xl font-bold text-text-main mt-8 mb-4">Macro Trends</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <TrendChart
+                    title="Calories"
+                    data={chartData}
+                    dataKey="calories"
+                    limit={user?.target_calories || 2000}
+                    unit="kcal"
+                />
+                <TrendChart
+                    title="Protein"
+                    data={chartData}
+                    dataKey="protein"
+                    limit={user?.target_protein || 150}
+                    unit="g"
+                />
+                <TrendChart
+                    title="Carbohydrates"
+                    data={chartData}
+                    dataKey="carbs"
+                    limit={user?.target_carbs || 200}
+                    unit="g"
+                />
+                <TrendChart
+                    title="Fats"
+                    data={chartData}
+                    dataKey="fat"
+                    limit={user?.target_fat || 70}
+                    unit="g"
+                />
+            </div>
         </div>
     );
 }

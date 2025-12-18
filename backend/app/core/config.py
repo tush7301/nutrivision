@@ -24,6 +24,9 @@ class Settings(BaseSettings):
 
     GOOGLE_CLIENT_ID: str | None = Field(default=None, alias="vite_google_client_id")
 
+    GCP_PROJECT_ID: str | None = Field(default=None, alias="vite_gcp_project_id")
+    GCP_LOCATION: str | None = Field(default=None, alias="vite_gcp_location")
+
     class Config:
         env_file = ".env"
         extra = "ignore"

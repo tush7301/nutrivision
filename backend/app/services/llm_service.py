@@ -5,14 +5,32 @@ import google.generativeai as genai
 
 from app.core.config import settings
 
+from vertexai.generative_models import GenerativeModel
+import vertexai
+from vertexai.language_models import TextGenerationModel
+from vertexai.preview.language_models import ChatMessage
+from vertexai.generative_models import Part, Content
+
+
 class LLMService:
     def __init__(self):
         self.api_key = settings.GEMINI_API_KEY
         self.model = None
         
-        if self.api_key:
-            genai.configure(api_key=self.api_key)
-            self.model = genai.GenerativeModel('gemini-2.0-flash')
+        # if self.api_key:
+        #     genai.configure(api_key=self.api_key)
+        #     self.model = genai.GenerativeModel('gemini-2.0-flash')
+        self.project_id = settings.GCP_PROJECT_ID
+        self.location = settings.GCP_LOCATION 
+        self.model = None
+        print("LOCATION AND PROJECT ID:", self.location, self.project_id)
+        if self.project_id and self.location:
+            vertexai.init(
+                project=self.project_id,
+                location=self.location,
+            )
+
+            self.model = GenerativeModel("gemini-2.5-pro")
             
     async def generate_dietary_analysis(self, meal_data: Dict[str, Any], user_profile: Dict[str, Any]) -> str:
         """
@@ -46,16 +64,17 @@ class LLMService:
         """
         Generates a chat response using Gemini, maintaining conversation history.
         """
-        if not self.api_key or not self.model:
+        if not self.model:
             return "I'm sorry, I cannot chat right now because the API key is missing."
 
         try:
             # Convert internal history format to Gemini format
             gemini_history = []
             for msg in history:
-                role = 'user' if msg['role'] == 'user' else 'model'
-                gemini_history.append({'role': role, 'parts': [msg['text']]})
-            
+                role = 'user' if msg['role'] == 'user' else 'assistant'
+                text_part = Part.from_text(msg["text"])
+                history = Content(role=role, parts=[text_part])
+                gemini_history.append(history)       
             chat = self.model.start_chat(history=gemini_history)
             
             # Prepend context to the message so the model knows the current state

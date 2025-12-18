@@ -58,7 +58,7 @@ export default function Layout() {
     }, []);
 
     const navItems = [
-        { name: 'Home', path: '/', icon: Home },
+        { name: 'Home', path: '/home', icon: Home },
         { name: 'Log Meal', path: '/upload', icon: Upload },
         { name: 'Insights', path: '/dashboard', icon: BarChart2 },
         { name: 'AI Coach', path: '/chat', icon: MessageSquare },
@@ -169,10 +169,10 @@ export default function Layout() {
                         <h3 className="font-semibold text-xs mb-0.5">Daily Goal</h3>
                         <div className="flex justify-between items-end mb-1.5">
                             <span className="text-xl font-bold">{dailyCalories.toLocaleString()}</span>
-                            <span className="text-xs opacity-80 mb-0.5">/ 2000</span>
+                            <span className="text-xs opacity-80 mb-0.5">/ {(user?.target_calories || 2000).toLocaleString()}</span>
                         </div>
                         <div className="w-full bg-black/20 rounded-full h-1">
-                            <div className="bg-white rounded-full h-1" style={{ width: `${Math.min((dailyCalories / 2000) * 100, 100)}%` }}></div>
+                            <div className="bg-white rounded-full h-1" style={{ width: `${Math.min((dailyCalories / (user?.target_calories || 2000)) * 100, 100)}%` }}></div>
                         </div>
                     </div>
                 </div>

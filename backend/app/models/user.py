@@ -13,6 +13,20 @@ class User(Base):
     picture = Column(String, nullable=True)
     language = Column(String, default="en") # en, es, hi, fr, etc.
     
+    # Physiological Data
+    age = Column(Integer, nullable=True)
+    gender = Column(String, nullable=True) # male, female
+    weight = Column(Integer, nullable=True) # kg
+    height = Column(Integer, nullable=True) # cm
+    activity_level = Column(String, default="sedentary") # sedentary, light, moderate, active, very_active
+    goal = Column(String, default="maintain") # lose, maintain, gain, build_muscle
+    
+    # Calculated Targets
+    target_calories = Column(Integer, default=2000)
+    target_protein = Column(Integer, default=150)
+    target_fat = Column(Integer, default=70)
+    target_carbs = Column(Integer, default=200)
+    
     created_at = Column(DateTime, default=datetime.utcnow)
     
     # Relationships will be added to Meal/Chat models later

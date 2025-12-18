@@ -21,11 +21,16 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
     
     try:
         # Verify the token with Google
-        # Assuming the frontend sends the ID token directly as the Bearer token
-        print(f"DEBUG: Verifying token: {token[:20]}...")
-        print(f"DEBUG: Using Client ID: {GOOGLE_CLIENT_ID}")
-        
-        idinfo = id_token.verify_oauth2_token(token, requests.Request(), GOOGLE_CLIENT_ID)
+        # Try as ID Token first (JWT)
+        try:
+            idinfo = id_token.verify_oauth2_token(token, requests.Request(), GOOGLE_CLIENT_ID)
+        except ValueError:
+            # Fallback: Try as Access Token
+            import requests as req
+            resp = req.get(f"https://www.googleapis.com/oauth2/v3/userinfo", headers={"Authorization": f"Bearer {token}"})
+            if resp.status_code != 200:
+                raise ValueError("Invalid Access Token")
+            idinfo = resp.json()
 
         # Get the user's Google ID (sub)
         google_sub = idinfo['sub']

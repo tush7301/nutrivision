@@ -39,6 +39,30 @@ export function AuthProvider({ children }) {
         }
     };
 
+    const loginWithAccessToken = async (accessToken) => {
+        setToken(accessToken);
+        localStorage.setItem('token', accessToken);
+
+        try {
+            // Fetch user info from Google using the access token
+            const response = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+                headers: { Authorization: `Bearer ${accessToken}` }
+            });
+            const payload = await response.json();
+
+            const userData = {
+                name: payload.name,
+                email: payload.email,
+                picture: payload.picture,
+                sub: payload.sub
+            };
+            setUser(userData);
+            localStorage.setItem('user', JSON.stringify(userData));
+        } catch (e) {
+            console.error("Failed to fetch user info", e);
+        }
+    };
+
     const logout = () => {
         googleLogout();
         setUser(null);
@@ -55,7 +79,7 @@ export function AuthProvider({ children }) {
     };
 
     return (
-        <AuthContext.Provider value={{ user, token, login, logout, loading, updateUser }}>
+        <AuthContext.Provider value={{ user, token, login, loginWithAccessToken, logout, loading, updateUser }}>
             {!loading && children}
         </AuthContext.Provider>
     );

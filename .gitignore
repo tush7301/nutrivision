@@ -20,3 +20,4 @@ backend/uploads/
 *.webp
 
 backend/data/
+package-lock.json

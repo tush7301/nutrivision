@@ -20,3 +20,4 @@ python-dotenv
 google-auth
 requests
 pydantic-settings
+google-cloud-aiplatform

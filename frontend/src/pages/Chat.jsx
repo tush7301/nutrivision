@@ -72,15 +72,7 @@ export default function Chat() {
                                 ? "bg-chat-user text-gray-900 dark:text-white rounded-tr-none"
                                 : "bg-chat-bot text-text-main rounded-tl-none w-full"
                         )}>
-                            {msg.role === 'user' ? (
-                                msg.text
-                            ) : (
-                                <ReactMarkdown
-                                    className="prose prose-sm prose-emerald dark:prose-invert max-w-none prose-p:my-1 prose-headings:my-2 prose-ul:my-1 prose-li:my-0"
-                                >
-                                    {msg.text}
-                                </ReactMarkdown>
-                            )}
+                            <div className="whitespace-pre-wrap text-sm">{msg.text || ''}</div>
                         </div>
                     </div>
                 ))}

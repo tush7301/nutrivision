@@ -36,6 +36,7 @@ async def chat_message(
         today = now_et.date()
         
         recent_meals = db.query(Meal).filter(Meal.user_id == current_user.id).order_by(Meal.created_at.desc()).limit(50).all()
+        print(f"DEBUG: Found {len(recent_meals)} recent meals")
         
         todays_meals = []
         for m in recent_meals:

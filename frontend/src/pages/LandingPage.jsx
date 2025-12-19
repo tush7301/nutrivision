@@ -31,19 +31,18 @@ export default function LandingPage() {
                 </div>
 
                 <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 bg-clip-text text-transparent bg-gradient-to-br from-white via-white to-white/50 animate-fade-in-up delay-100">
-                    Eat Smarter.<br />
-                    Live Better.
+                    Turn photos into progress
                 </h1>
 
                 <p className="text-lg md:text-xl text-gray-400 mb-10 max-w-2xl mx-auto leading-relaxed animate-fade-in-up delay-200">
-                    Instantly analyze your meals with AI, track your macros, and get personalized coaching to reach your goals.
+                    Just snap, eat, and achieve your goals with real-time AI coaching.
                 </p>
 
                 <button
                     onClick={() => handleGoogleLogin()}
                     className="group relative inline-flex items-center gap-3 px-8 py-4 bg-white text-black rounded-full font-bold text-lg transition-all hover:scale-105 hover:shadow-[0_0_40px_-10px_rgba(255,255,255,0.3)] animate-fade-in-up delay-300"
                 >
-                    Start Your NutriVision Now
+                    Start your journey now!
                     <ArrowRight size={20} className="transition-transform group-hover:translate-x-1" />
                 </button>
             </div>

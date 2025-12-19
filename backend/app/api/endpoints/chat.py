@@ -56,13 +56,6 @@ async def chat_message(
         if last_meal:
             last_meal_info = f"{last_meal.food_name} ({last_meal.calories} kcal) on {last_meal.created_at.strftime('%Y-%m-%d %H:%M')}"
         
-        context = (
-            f"Context: Today is {today}. "
-            f"The user has consumed {total_calories} kcal today. "
-            f"Daily goal is 2000 kcal. "
-            f"Meals eaten today: {meal_summary if meal_summary else 'None yet'}. "
-            f"Last recorded meal: {last_meal_info}. "
-        )
         
         # Language mapping for clearer LLM instructions
         lang_map = {
@@ -79,10 +72,12 @@ async def chat_message(
         
         print(f"DEBUG: User language is {user_lang_code} ({user_lang_name})")
 
+        target_cals = current_user.target_calories or 2000
+
         context = (
             f"Context: Today is {today}. "
             f"The user has consumed {total_calories} kcal today. "
-            f"Daily goal is 2000 kcal. "
+            f"Daily goal is {target_cals} kcal. "
             f"Meals eaten today: {meal_summary if meal_summary else 'None yet'}. "
             f"Last recorded meal: {last_meal_info}. "
             f"SYSTEM INSTRUCTION: You represent NutriVision, an AI Nutrition Coach. "

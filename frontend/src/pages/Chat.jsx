@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Send, User, Bot, Sparkles, Loader, Volume2, Square } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import clsx from 'clsx';
@@ -24,6 +24,15 @@ export default function Chat() {
     const [loading, setLoading] = useState(false);
     const [input, setInput] = useState('');
     const [speakingId, setSpeakingId] = useState(null);
+    const messagesEndRef = useRef(null);
+
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
+
+    useEffect(() => {
+        scrollToBottom();
+    }, [messages, loading]);
 
     // Update greeting when language changes (only if conversation hasn't started)
     useEffect(() => {
@@ -131,7 +140,9 @@ export default function Chat() {
                                 ? "bg-chat-user text-gray-900 dark:text-white rounded-tr-none"
                                 : "bg-chat-bot text-text-main rounded-tl-none w-full"
                         )}>
-                            <div className="whitespace-pre-wrap text-sm">{msg.text || ''}</div>
+                            <div className="text-sm prose prose-sm prose-emerald dark:prose-invert max-w-none break-words">
+                                <ReactMarkdown>{msg.text || ''}</ReactMarkdown>
+                            </div>
 
                             {/* TTS Button for Assistant */}
                             {msg.role === 'assistant' && (
@@ -146,6 +157,7 @@ export default function Chat() {
                         </div>
                     </div>
                 ))}
+                <div ref={messagesEndRef} />
             </div>
 
             {/* Input */}

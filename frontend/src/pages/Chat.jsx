@@ -7,12 +7,35 @@ import { useAuth } from '../context/AuthContext';
 
 export default function Chat() {
     const { user } = useAuth();
+
+    const GREETINGS = {
+        en: "Hi! I'm your specific nutrition coach. How are you feeling about your diet today?",
+        es: "¡Hola! Soy tu entrenador de nutrición personal. ¿Cómo te sientes con tu dieta hoy?",
+        hi: "नमस्ते! मैं आपका निजी पोषण कोच हूँ। आज आप अपने आहार के बारे में कैसा महसूस कर रहे हैं?",
+        fr: "Salut ! Je suis votre coach nutritionnel personnel. Comment vous sentez-vous par rapport à votre alimentation aujourd'hui ?",
+        de: "Hallo! Ich bin dein persönlicher Ernährungscoach. Wie fühlst du dich heute mit deiner Ernährung?",
+        zh: "你好！我是你的专属营养教练。今天你对无论是饮食有什么感觉？",
+        ja: "こんにちは！あなたの専属栄養コーチです。今日の食事についてどう感じていますか？"
+    };
+
     const [messages, setMessages] = useState([
-        { id: 1, role: 'assistant', text: "Hi! I'm your specific nutrition coach. How are you feeling about your diet today?" }
+        { id: 1, role: 'assistant', text: GREETINGS.en }
     ]);
     const [loading, setLoading] = useState(false);
     const [input, setInput] = useState('');
     const [speakingId, setSpeakingId] = useState(null);
+
+    // Update greeting when language changes (only if conversation hasn't started)
+    useEffect(() => {
+        if (messages.length === 1 && messages[0].role === 'assistant') {
+            const lang = user?.language || 'en';
+            setMessages([{
+                id: 1,
+                role: 'assistant',
+                text: GREETINGS[lang] || GREETINGS['en']
+            }]);
+        }
+    }, [user?.language]);
 
     // Stop speaking when component unmounts
     useEffect(() => {

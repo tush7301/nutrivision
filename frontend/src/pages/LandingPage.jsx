@@ -30,7 +30,7 @@ export default function LandingPage() {
                     <span className="text-xs font-medium text-emerald-200 tracking-wide uppercase">NUTRIVISION</span>
                 </div>
 
-                <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 bg-clip-text text-transparent bg-gradient-to-br from-white via-white to-white/50 animate-fade-in-up delay-100">
+                <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 bg-clip-text text-transparent bg-gradient-to-br from-white via-white to-white/50 animate-fade-in-up delay-100 pb-2">
                     Turn photos into progress
                 </h1>
 

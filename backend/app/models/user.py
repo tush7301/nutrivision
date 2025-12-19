@@ -22,10 +22,10 @@ class User(Base):
     goal = Column(String, default="maintain") # lose, maintain, gain, build_muscle
     
     # Calculated Targets
-    target_calories = Column(Integer, default=2000)
-    target_protein = Column(Integer, default=150)
-    target_fat = Column(Integer, default=70)
-    target_carbs = Column(Integer, default=200)
+    target_calories = Column(Integer, nullable=True)
+    target_protein = Column(Integer, nullable=True)
+    target_fat = Column(Integer, nullable=True)
+    target_carbs = Column(Integer, nullable=True)
     
     created_at = Column(DateTime, default=datetime.utcnow)
     

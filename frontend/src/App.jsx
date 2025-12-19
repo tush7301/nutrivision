@@ -21,8 +21,8 @@ function ProtectedRoute({ children }) {
     return <Navigate to="/" />; // Redirect unauth to Landing Page
   }
 
-  // Check if onboarding is complete
-  if ((!user.age && !user.target_calories) && location.pathname !== '/onboarding') {
+  // Check if onboarding is complete (Age is the primary indicator)
+  if (!user.age && location.pathname !== '/onboarding') {
     return <Navigate to="/onboarding" />;
   }
 

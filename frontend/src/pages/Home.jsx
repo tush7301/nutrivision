@@ -97,7 +97,9 @@ export default function Home() {
 
     return (
         <div className="space-y-6">
-            <h1 className="text-3xl font-bold text-text-main">Welcome back!</h1>
+            <h1 className="text-3xl font-bold text-text-main">
+                Welcome back{user?.full_name ? `, ${user.full_name.split(' ')[0]}` : ''}!
+            </h1>
 
             <div className="grid md:grid-cols-2 gap-6">
                 {/* Recent Meals Card */}

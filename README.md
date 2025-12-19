@@ -4,12 +4,12 @@ NutriVision is an AI-powered nutrition tracking and coaching application. It all
 
 ## Features
 
--   ** AI Food Recognition**: Automatically identifies food items from images.
--   ** Portion Estimation**: Estimates portion sizes using computer vision.
--   ** AI Coaching**: Individualized dietary feedback and advice based on your goals.
--   ** Dashboard**: Track daily calorie intake and nutritional breakdown (Carbs, Protein, Fats).
--   ** Secure Login**: Google Authentication support.
--   ** Dark Mode**: Beautiful UI with full dark mode support.
+-   **AI Food Recognition**: Automatically identifies food items from images.
+-   **Portion Estimation**: Estimates portion sizes using computer vision.
+-   **AI Coaching**: Individualized dietary feedback and advice based on your goals.
+-   **Dashboard**: Track daily calorie intake and nutritional breakdown (Carbs, Protein, Fats).
+-   **Secure Login**: Google Authentication support.
+-   **Dark Mode**: Beautiful UI with full dark mode support.
 
 ## Tech Stack
 

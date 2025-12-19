@@ -60,7 +60,34 @@ def calculate_targets(user: User):
     user.target_calories = target_cals
     user.target_protein = int((target_cals * 0.3) / 4)
     user.target_fat = int((target_cals * 0.35) / 9)
+    user.target_fat = int((target_cals * 0.35) / 9)
     user.target_carbs = int((target_cals * 0.35) / 4)
+
+class UserOut(BaseModel):
+    id: int
+    email: str
+    full_name: Optional[str] = None
+    picture: Optional[str] = None
+    age: Optional[int] = None
+    gender: Optional[str] = None
+    weight: Optional[int] = None
+    height: Optional[int] = None
+    activity_level: Optional[str] = None
+    goal: Optional[str] = None
+    target_calories: Optional[int] = None
+    target_protein: Optional[int] = None
+    target_fat: Optional[int] = None
+    target_carbs: Optional[int] = None
+    language: Optional[str] = None
+
+    class Config:
+        orm_mode = True
+
+@router.get("/me", response_model=UserOut)
+def read_user_me(
+    current_user: User = Depends(get_current_user)
+):
+    return current_user
 
 @router.put("/me")
 def update_user_me(

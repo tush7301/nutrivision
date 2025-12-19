@@ -1,15 +1,51 @@
-import { useState } from 'react';
-import { Send, User, Bot, Sparkles, Loader } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Send, User, Bot, Sparkles, Loader, Volume2, Square } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import clsx from 'clsx';
 import api from '../api/axios';
+import { useAuth } from '../context/AuthContext';
 
 export default function Chat() {
+    const { user } = useAuth();
     const [messages, setMessages] = useState([
         { id: 1, role: 'assistant', text: "Hi! I'm your specific nutrition coach. How are you feeling about your diet today?" }
     ]);
     const [loading, setLoading] = useState(false);
     const [input, setInput] = useState('');
+    const [speakingId, setSpeakingId] = useState(null);
+
+    // Stop speaking when component unmounts
+    useEffect(() => {
+        return () => window.speechSynthesis.cancel();
+    }, []);
+
+    const speak = (text, id) => {
+        if (speakingId === id) {
+            window.speechSynthesis.cancel();
+            setSpeakingId(null);
+            return;
+        }
+
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+
+        // Map app language codes to BCP 47 tags
+        const langMap = {
+            'en': 'en-US',
+            'es': 'es-ES',
+            'hi': 'hi-IN',
+            'fr': 'fr-FR',
+            'de': 'de-DE',
+            'zh': 'zh-CN',
+            'ja': 'ja-JP'
+        };
+
+        utterance.lang = langMap[user?.language] || 'en-US';
+
+        utterance.onend = () => setSpeakingId(null);
+        setSpeakingId(id);
+        window.speechSynthesis.speak(utterance);
+    };
 
     const handleSend = async () => {
         if (!input.trim() || loading) return;
@@ -67,12 +103,23 @@ export default function Chat() {
                             {msg.role === 'user' ? <User size={16} /> : <Bot size={16} />}
                         </div>
                         <div className={clsx(
-                            "p-3 rounded-2xl text-sm leading-relaxed max-w-full overflow-hidden",
+                            "p-3 rounded-2xl text-sm leading-relaxed max-w-full overflow-hidden relative group",
                             msg.role === 'user'
                                 ? "bg-chat-user text-gray-900 dark:text-white rounded-tr-none"
                                 : "bg-chat-bot text-text-main rounded-tl-none w-full"
                         )}>
                             <div className="whitespace-pre-wrap text-sm">{msg.text || ''}</div>
+
+                            {/* TTS Button for Assistant */}
+                            {msg.role === 'assistant' && (
+                                <button
+                                    onClick={() => speak(msg.text, msg.id)}
+                                    className="absolute top-2 right-2 p-1.5 bg-black/5 dark:bg-white/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-emerald-100 dark:hover:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400"
+                                    title={speakingId === msg.id ? "Stop Speaking" : "Read Aloud"}
+                                >
+                                    {speakingId === msg.id ? <Square size={14} fill="currentColor" /> : <Volume2 size={14} />}
+                                </button>
+                            )}
                         </div>
                     </div>
                 ))}

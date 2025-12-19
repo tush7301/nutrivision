@@ -62,7 +62,33 @@ async def chat_message(
             f"Daily goal is 2000 kcal. "
             f"Meals eaten today: {meal_summary if meal_summary else 'None yet'}. "
             f"Last recorded meal: {last_meal_info}. "
-            f"IMPORTANT: The user speaks '{current_user.language or 'en'}'. Respond in that language."
+        )
+        
+        # Language mapping for clearer LLM instructions
+        lang_map = {
+            'en': 'English',
+            'es': 'Spanish',
+            'hi': 'Hindi',
+            'fr': 'French',
+            'de': 'German',
+            'zh': 'Chinese',
+            'ja': 'Japanese'
+        }
+        user_lang_code = current_user.language or 'en'
+        user_lang_name = lang_map.get(user_lang_code, 'English')
+        
+        print(f"DEBUG: User language is {user_lang_code} ({user_lang_name})")
+
+        context = (
+            f"Context: Today is {today}. "
+            f"The user has consumed {total_calories} kcal today. "
+            f"Daily goal is 2000 kcal. "
+            f"Meals eaten today: {meal_summary if meal_summary else 'None yet'}. "
+            f"Last recorded meal: {last_meal_info}. "
+            f"SYSTEM INSTRUCTION: You represent NutriVision, an AI Nutrition Coach. "
+            f"The user's preferred language is {user_lang_name}. "
+            f"You MUST respond entirely in {user_lang_name}. "
+            f"Do not respond in English unless the user asks you to switch languages."
         )
 
         response = await llm_service.generate_chat_response(request.history, request.message, context)

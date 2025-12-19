@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { googleLogout } from '@react-oauth/google';
+import api from '../api/axios';
 
 const AuthContext = createContext();
 
@@ -18,24 +19,32 @@ export function AuthProvider({ children }) {
         setLoading(false);
     }, [token]);
 
-    const login = (credentialResponse) => {
+    const login = async (credentialResponse) => {
         const jwt = credentialResponse.credential;
         setToken(jwt);
         localStorage.setItem('token', jwt);
 
-        // Decode JWT to get user info (basic info is in the payload)
-        // simple decode for display purposes
         try {
-            const payload = JSON.parse(atob(jwt.split('.')[1]));
-            const userData = {
-                name: payload.name,
-                email: payload.email,
-                picture: payload.picture
-            };
-            setUser(userData);
-            localStorage.setItem('user', JSON.stringify(userData));
+            // Fetch full user profile from backend
+            // The interceptor will pick up the token from localStorage
+            const { data } = await api.get('/users/me');
+            setUser(data);
+            localStorage.setItem('user', JSON.stringify(data));
         } catch (e) {
-            console.error("Failed to decode token", e);
+            console.error("Failed to fetch user profile", e);
+            // Fallback to basic decode if backend fails (unlikely if setup is correct)
+            try {
+                const payload = JSON.parse(atob(jwt.split('.')[1]));
+                const userData = {
+                    name: payload.name,
+                    email: payload.email,
+                    picture: payload.picture
+                };
+                setUser(userData);
+                localStorage.setItem('user', JSON.stringify(userData));
+            } catch (decodeError) {
+                console.error("Failed to decode token", decodeError);
+            }
         }
     };
 
@@ -44,22 +53,18 @@ export function AuthProvider({ children }) {
         localStorage.setItem('token', accessToken);
 
         try {
-            // Fetch user info from Google using the access token
-            const response = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-                headers: { Authorization: `Bearer ${accessToken}` }
-            });
-            const payload = await response.json();
+            // First validation/creation via backend implicitly happens when we call an endpoint
+            // But get_current_user in backend validates the token with Google
 
-            const userData = {
-                name: payload.name,
-                email: payload.email,
-                picture: payload.picture,
-                sub: payload.sub
-            };
-            setUser(userData);
-            localStorage.setItem('user', JSON.stringify(userData));
+            // Verify and Get Profile from Backend
+            const { data } = await api.get('/users/me');
+            setUser(data);
+            localStorage.setItem('user', JSON.stringify(data));
+
         } catch (e) {
-            console.error("Failed to fetch user info", e);
+            console.error("Failed to fetch user info from backend", e);
+            // If backend fails, maybe try simple google info? 
+            // But for Onboarding check we NEED backend info.
         }
     };
 

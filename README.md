@@ -2,6 +2,10 @@
 
 NutriVision is an AI-powered nutrition tracking and coaching application. It allows users to log meals by simply taking a photo, uses computer vision to identify foods and estimate portions, and provides personalized dietary advice using LLMs.
 
+## Product Demo
+
+https://drive.google.com/file/d/1clqk7BT0UD8etuuMKouYUpWvHsNasAZ3/view 
+
 ## Key Features & Architecture
 
 1. Developed a production-ready vision–language AI system that transforms food images into nutritional insights and personalized recommendations, removing the need for manual food logging.

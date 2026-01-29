@@ -6,6 +6,10 @@ NutriVision is an AI-powered nutrition tracking and coaching application. It all
 
 https://nutrivision-firebase-7301.web.app/
 
+## API Healthcheck
+
+https://nutrivision-backend-575512663062.us-central1.run.app/
+
 ## Product Demo
 
 https://drive.google.com/file/d/1clqk7BT0UD8etuuMKouYUpWvHsNasAZ3/view 

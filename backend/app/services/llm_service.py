@@ -1,40 +1,27 @@
 from typing import List, Dict, Any
-import os
 import google.generativeai as genai
-
 from app.core.config import settings
-
-from vertexai.generative_models import GenerativeModel
-import vertexai
-from vertexai.language_models import TextGenerationModel
-from vertexai.preview.language_models import ChatMessage
-from vertexai.generative_models import Part, Content
-
 
 class LLMService:
     def __init__(self):
         self.api_key = settings.GEMINI_API_KEY
         self.model = None
-        self.project_id = settings.GCP_PROJECT_ID
-        self.location = settings.GCP_LOCATION 
-        self.model = None
-        print("LOCATION AND PROJECT ID:", self.location, self.project_id)
-        if self.project_id and self.location:
+        
+        if self.api_key:
             try:
-                vertexai.init(
-                    project=self.project_id,
-                    location=self.location,
-                )
-                self.model = GenerativeModel("gemini-1.5-pro")
+                genai.configure(api_key=self.api_key)
+                self.model = genai.GenerativeModel("gemini-2.5-pro")
             except Exception as e:
-                print(f"WARNING: Vertex AI init failed: {e}. Falling back to mock.")
+                print(f"WARNING: Gemini AI init failed: {e}. Falling back to mock.")
                 self.model = None
-            
+        else:
+            print("WARNING: No GEMINI_API_KEY found. Falling back to mock.")
+
     async def generate_dietary_analysis(self, meal_data: Dict[str, Any], user_profile: Dict[str, Any]) -> str:
         """
         Generates personalized dietary advice based on the identified meal and user profile using Gemini.
         """
-        if not self.api_key or not self.model:
+        if not self.model:
             return (
                 "AI Analysis (Mock - Gemini): Based on your meal of "
                 f"{meal_data.get('food_name', 'unknown food')}, here are some insights. "
@@ -82,13 +69,17 @@ class LLMService:
             return "I'm sorry, I cannot chat right now because the API key is missing."
 
         try:
-            # Convert internal history format to Gemini format
+            # Convert internal history format to Gemini SDK format
+            # Internal: {'role': 'user'|'assistant', 'text': '...'}
+            # Gemini SDK: [{'role': 'user'|'model', 'parts': ['...']}]
             gemini_history = []
             for msg in history:
-                role = 'user' if msg['role'] == 'user' else 'assistant'
-                text_part = Part.from_text(msg["text"])
-                history = Content(role=role, parts=[text_part])
-                gemini_history.append(history)       
+                role = 'user' if msg['role'] == 'user' else 'model'
+                gemini_history.append({
+                    "role": role,
+                    "parts": [msg["text"]]
+                })
+            
             chat = self.model.start_chat(history=gemini_history)
             
             # Prepend context to the message so the model knows the current state

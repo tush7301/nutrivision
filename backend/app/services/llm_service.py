@@ -20,11 +20,15 @@ class LLMService:
         self.model = None
         print("LOCATION AND PROJECT ID:", self.location, self.project_id)
         if self.project_id and self.location:
-            vertexai.init(
-                project=self.project_id,
-                location=self.location,
-            )
-            self.model = GenerativeModel("gemini-2.5-pro")
+            try:
+                vertexai.init(
+                    project=self.project_id,
+                    location=self.location,
+                )
+                self.model = GenerativeModel("gemini-1.5-pro")
+            except Exception as e:
+                print(f"WARNING: Vertex AI init failed: {e}. Falling back to mock.")
+                self.model = None
             
     async def generate_dietary_analysis(self, meal_data: Dict[str, Any], user_profile: Dict[str, Any]) -> str:
         """

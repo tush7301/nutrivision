@@ -12,8 +12,9 @@ class VisionService:
         print(f"VisionService using device: {self.device}")
         
         # Load Fine-Tuned Model
+        from app.core.config import settings
         self.model = FoodClassifier(num_classes=101, pretrained=False)
-        model_path = "app/models/food_classifier_finetuned.pth"
+        model_path = settings.MODEL_PATH
         
         if os.path.exists(model_path):
             print(f"Loading fine-tuned weights from {model_path}")

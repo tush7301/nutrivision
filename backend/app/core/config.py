@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
     # Model Paths
-    MODEL_PATH: str = "models/food_classifier.pth"
+    MODEL_PATH: str = "app/models/food_classifier_finetuned.pth"
 
     GOOGLE_CLIENT_ID: str | None = Field(default=None, alias="vite_google_client_id")
 

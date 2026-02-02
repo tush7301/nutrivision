@@ -31,4 +31,9 @@ RUN mkdir -p uploads data
 EXPOSE 8000
 
 # Run app.main:app when the container launches
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Copy the start script
+COPY start.sh .
+RUN chmod +x start.sh
+
+# Run the start script
+CMD ["./start.sh"]

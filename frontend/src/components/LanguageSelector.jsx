@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import api from '../api/axios';
 
 const LANGUAGES = [
     { code: 'en', label: 'English' },
@@ -24,20 +25,11 @@ export default function LanguageSelector() {
 
         if (token) {
             try {
-                const response = await fetch('http://localhost:8000/api/v1/users/me', {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({ language: newLang })
-                });
-
-                if (!response.ok) {
-                    console.error("Failed to update language on backend");
-                }
+                // Use the configured api client which handles base URL and auth headers
+                await api.put('/users/me', { language: newLang });
             } catch (error) {
                 console.error("Error updating language:", error);
+                // Optionally revert optimistic update here if needed
             }
         }
 

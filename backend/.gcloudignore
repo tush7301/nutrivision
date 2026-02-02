@@ -1,0 +1,23 @@
+# Exclude large local data and environments
+data/
+venv/
+.venv/
+env/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Exclude git and OS files
+.git/
+.DS_Store
+
+# Exclude local database and uploads
+nutrivision.db
+uploads/
+backend_log.txt
+
+# Exclude sensitive files (though env is often needed if not set in cloud)
+# .env # keeping .env commented out as user might want to include it, though securely it should be env vars.
+# Given the user environment, we'll exclude .env and rely on Cloud Run env vars which is safer.
+.env

@@ -1,5 +1,5 @@
-from pydantic import BaseModel
-from typing import Optional
+from pydantic import BaseModel, Field
+from typing import List, Optional
 from datetime import datetime
 
 class MealBase(BaseModel):
@@ -25,7 +25,16 @@ class Meal(MealBase):
     class Config:
         from_attributes = True
 
+class Candidate(BaseModel):
+    food: str
+    confidence: float
+
 class AnalysisResponse(BaseModel):
     meal: Optional[Meal] = None
     advice: str
     is_food: bool = True
+    candidates: List[Candidate] = []
+
+class MealUpdate(BaseModel):
+    food_name: Optional[str] = Field(default=None, min_length=1, max_length=100)
+    weight_g: Optional[float] = Field(default=None, gt=0, le=5000)

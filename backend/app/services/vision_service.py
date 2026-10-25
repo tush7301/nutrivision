@@ -88,9 +88,9 @@ class VisionService:
                 break
                 
         return {
-            "portion_size": f"standard ({weight}g)",
+            "portion_size": f"{weight}g",
             "estimated_weight_g": weight,
-            "confidence": 0.8
+            "portion_confidence": 0.8
         }
 
 vision_service = VisionService()

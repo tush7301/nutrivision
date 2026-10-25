@@ -9,11 +9,9 @@ services:
       - "8000:8000"
     environment:
       - DATABASE_URL=sqlite:///./nutrivision.db
-      - GOOGLE_APPLICATION_CREDENTIALS=/root/.config/gcloud/application_default_credentials.json
     volumes:
       - ./backend:/app
       - nutrivision_data:/app/data
-      - ~/.config/gcloud:/root/.config/gcloud
     env_file:
       - ./backend/.env
 

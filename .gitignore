@@ -20,3 +20,10 @@ backend/uploads/
 *.webp
 
 backend/data/
+# GCP credentials
+sa-key.json
+*-sa-key.json
+
+# Local data
+*.db
+backend_log.txt

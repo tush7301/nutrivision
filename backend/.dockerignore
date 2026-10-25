@@ -6,3 +6,5 @@ uploads/
 *.pyc
 .git
 .gitignore
+*.db
+backend_log.txt

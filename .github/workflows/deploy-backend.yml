@@ -1,0 +1,56 @@
+name: Deploy Backend to Cloud Run
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'backend/**'
+      - '.github/workflows/deploy-backend.yml'
+  workflow_dispatch:
+
+env:
+  PROJECT_ID: powerful-effort-299312
+  REGION: us-central1
+  SERVICE_NAME: nutrivision-backend
+  IMAGE: us-central1-docker.pkg.dev/powerful-effort-299312/nutrivision/backend
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    # Needed for keyless auth via Workload Identity Federation
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: projects/575512663062/locations/global/workloadIdentityPools/github-pool/providers/github-provider
+        service_account: github-deployer@powerful-effort-299312.iam.gserviceaccount.com
+
+    - name: Set up Cloud SDK
+      uses: google-github-actions/setup-gcloud@v2
+
+    - name: Configure Docker for Artifact Registry
+      run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
+
+    - name: Build Docker Image
+      run: docker build -t ${{ env.IMAGE }}:${{ github.sha }} ./backend
+
+    - name: Push Docker Image
+      run: docker push ${{ env.IMAGE }}:${{ github.sha }}
+
+    - name: Deploy to Cloud Run
+      uses: google-github-actions/deploy-cloudrun@v2
+      with:
+        service: ${{ env.SERVICE_NAME }}
+        image: ${{ env.IMAGE }}:${{ github.sha }}
+        region: ${{ env.REGION }}
+        project_id: ${{ env.PROJECT_ID }}
+        flags: --min-instances=0

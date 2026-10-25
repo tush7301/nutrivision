@@ -1,8 +1,10 @@
 import { useState, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { Upload as UploadIcon, X, Loader, Camera, CheckCircle, AlertCircle, MessageSquare } from 'lucide-react';
+import { X, Loader, Camera, AlertCircle, MessageSquare, ImageOff } from 'lucide-react';
 import api from '../api/axios';
-import clsx from 'clsx';
+import MealReview from '../components/MealReview';
+import UndoToast from '../components/UndoToast';
+import { useUndoableDelete } from '../hooks/useUndoableDelete';
 
 export default function UploadPage() {
     const [file, setFile] = useState(null);
@@ -11,6 +13,7 @@ export default function UploadPage() {
     const [result, setResult] = useState(null);
     const [error, setError] = useState(null);
     const fileInputRef = useRef(null);
+    const { pendingMeal, remove, undo } = useUndoableDelete();
 
     const handleFileChange = (e) => {
         const selected = e.target.files[0];
@@ -39,11 +42,32 @@ export default function UploadPage() {
             });
             setResult(response.data);
         } catch (err) {
-            setError('Failed to analyze meal. Please try again.');
             console.error(err);
+            setError(
+                err.response
+                    ? "We couldn't analyze that photo. Try again, or use a clearer, well-lit shot of the plate."
+                    : "Couldn't reach NutriVision. Check your connection and try again."
+            );
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleMealChange = (meal, advice) => {
+        setResult((prev) => ({ ...prev, meal, advice }));
+    };
+
+    const handleDelete = () => {
+        const snapshot = { file, preview, result };
+        remove(result.meal, {
+            onUndo: () => {
+                setFile(snapshot.file);
+                setPreview(snapshot.preview);
+                setResult(snapshot.result);
+            },
+            onError: () => setError("Couldn't remove that meal. It's still in your log."),
+        });
+        handleClear();
     };
 
     const handleClear = () => {
@@ -87,7 +111,9 @@ export default function UploadPage() {
                     <div className="relative">
                         <img src={preview} alt="Meal preview" className="w-full h-64 md:h-80 object-cover" />
                         <button
+                            type="button"
                             onClick={handleClear}
+                            aria-label={result?.meal ? 'Close and log another meal' : 'Remove photo'}
                             className="absolute top-4 right-4 p-2 bg-black/50 hover:bg-black/70 text-white rounded-full transition-colors"
                         >
                             <X size={20} />
@@ -121,51 +147,54 @@ export default function UploadPage() {
                 )}
             </div>
 
-            {/* Results */}
-            {result && (
-                <div className="grid gap-6 animate-in slide-in-from-bottom-4 duration-500">
-                    {/* Main Info */}
-                    <div className="bg-card-bg p-6 rounded-3xl shadow-sm border border-border-base flex items-start justify-between">
-                        <div>
-                            <h2 className="text-2xl font-bold text-text-main capitalize">{result.meal.food_name}</h2>
-                            <p className="text-text-muted flex items-center gap-2 mt-1">
-                                <span className="bg-gray-200 dark:bg-slate-700 px-2.5 py-0.5 rounded-md text-sm font-medium text-gray-900 dark:text-gray-100 capitalize">{result.meal.portion_size} portion</span>
-                                <span className="text-emerald-600 dark:text-emerald-400 text-sm font-medium">({Math.round(result.meal.confidence * 100)}% confidence)</span>
-                            </p>
-                        </div>
-                        <div className="text-right">
-                            <div className="text-3xl font-bold text-emerald-600 dark:text-emerald-500">{Math.round(result.meal.calories)}</div>
-                            <div className="text-xs text-text-muted uppercase tracking-wide font-medium">Calories</div>
-                        </div>
+            {/* Not food: the gatekeeper rejected the photo, nothing was logged */}
+            {result && result.is_food === false && (
+                <div role="alert" className="bg-card-bg p-6 rounded-3xl border border-border-base shadow-sm flex flex-col sm:flex-row sm:items-center gap-4">
+                    <ImageOff size={28} className="text-amber-700 dark:text-amber-400 shrink-0" aria-hidden="true" />
+                    <div className="flex-1">
+                        <h2 className="font-semibold text-text-main">That doesn't look like food</h2>
+                        <p className="text-text-muted text-sm mt-1">Nothing was logged. Try a photo where the meal fills most of the frame.</p>
                     </div>
+                    <button
+                        type="button"
+                        onClick={handleClear}
+                        className="bg-emerald-700 hover:bg-emerald-800 text-white font-medium py-2 px-5 rounded-full transition-colors self-start sm:self-auto"
+                    >
+                        Try another photo
+                    </button>
+                </div>
+            )}
 
-                    {/* Macros */}
-                    <div className="grid grid-cols-3 gap-4">
-                        {[
-                            { label: 'Protein', value: result.meal.protein, color: 'text-blue-600 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-900/20 border-blue-100 dark:border-blue-900/30' },
-                            { label: 'Carbs', value: result.meal.carbs, color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-50 dark:bg-amber-900/20 border-amber-100 dark:border-amber-900/30' },
-                            { label: 'Fats', value: result.meal.fats, color: 'text-rose-600 dark:text-rose-400', bg: 'bg-rose-50 dark:bg-rose-900/20 border-rose-100 dark:border-rose-900/30' },
-                        ].map((macro) => (
-                            <div key={macro.label} className={`rounded-2xl p-4 border ${macro.bg}`}>
-                                <div className={`text-xl font-bold ${macro.color}`}>{macro.value}g</div>
-                                <div className="text-xs text-text-muted font-medium">{macro.label}</div>
-                            </div>
-                        ))}
-                    </div>
+            {/* Results */}
+            {result?.meal && (
+                <div className="grid gap-6">
+                    <MealReview
+                        key={result.meal.id}
+                        meal={result.meal}
+                        candidates={result.candidates}
+                        onMealChange={handleMealChange}
+                        onDelete={handleDelete}
+                    />
 
                     {/* AI Analysis */}
-                    <div className="bg-card-bg p-6 rounded-3xl border border-border-base shadow-sm">
-                        <div className="flex items-center gap-2 mb-3">
-                            <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-full">
-                                <MessageSquare size={20} />
+                    {result.advice && (
+                        <div className="bg-card-bg p-6 rounded-3xl border border-border-base shadow-sm">
+                            <div className="flex items-center gap-2 mb-3">
+                                <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 rounded-full">
+                                    <MessageSquare size={20} aria-hidden="true" />
+                                </div>
+                                <h3 className="font-semibold text-text-main">Coach's Insight</h3>
                             </div>
-                            <h3 className="font-semibold text-text-main">Coach's Insight</h3>
+                            <div className="prose prose-sm prose-emerald dark:prose-invert max-w-none text-text-main prose-headings:text-text-main prose-strong:text-text-main leading-relaxed">
+                                <ReactMarkdown>{result.advice}</ReactMarkdown>
+                            </div>
                         </div>
-                        <div className="prose prose-sm prose-emerald dark:prose-invert max-w-none text-text-main prose-headings:text-text-main prose-strong:text-text-main leading-relaxed">
-                            <ReactMarkdown>{result.advice}</ReactMarkdown>
-                        </div>
-                    </div>
+                    )}
                 </div>
+            )}
+
+            {pendingMeal && (
+                <UndoToast message={`Removed ${pendingMeal.food_name} from your log`} onUndo={undo} />
             )}
         </div>
     );

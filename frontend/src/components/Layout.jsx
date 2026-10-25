@@ -5,6 +5,7 @@ import clsx from 'clsx';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import LanguageSelector from './LanguageSelector';
+import ErrorBoundary from './ErrorBoundary';
 
 export default function Layout() {
     const [isMobileOpen, setIsMobileOpen] = useState(false);
@@ -242,7 +243,9 @@ export default function Layout() {
 
                 {/* Page Content */}
                 <main className="flex-1 p-4 md:p-8 max-w-7xl mx-auto w-full">
-                    <Outlet />
+                    <ErrorBoundary key={location.pathname}>
+                        <Outlet />
+                    </ErrorBoundary>
                 </main>
             </div>
         </div>

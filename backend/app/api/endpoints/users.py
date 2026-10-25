@@ -81,7 +81,7 @@ class UserOut(BaseModel):
     language: Optional[str] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 @router.get("/me", response_model=UserOut)
 def read_user_me(

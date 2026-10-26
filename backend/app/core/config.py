@@ -14,6 +14,13 @@ class Settings(BaseSettings):
     USDA_API_KEY: str | None = None
     OPENAI_API_KEY: str | None = None
     GEMINI_API_KEY: str | None = None
+    # gemini-2.5-pro has no free-tier quota and 2.5-flash is closed to new keys
+    GEMINI_MODEL: str = "gemini-flash-latest"
+    GEMINI_TIMEOUT_S: float = 30.0
+    # Short coaching tips don't need deep reasoning; default thinking can exceed the timeout
+    GEMINI_THINKING_LEVEL: str = "LOW"
+    # Used once if the primary model is overloaded (503) or times out; empty disables it
+    GEMINI_FALLBACK_MODEL: str = "gemini-flash-lite-latest"
     
     # Security
     SECRET_KEY: str = "your_secret_key"
